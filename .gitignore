@@ -6,3 +6,4 @@ test/
 *.out
 *.err
 *.pdf
+*.sh
