@@ -1,1 +1,8 @@
 BH/
+bin/
+lib/
+test/
+*.npz
+*.out
+*.err
+*.pdf
