@@ -174,7 +174,7 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
             MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
             error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
-            if error <= bestMAerror:
+            if np.abs(error) <= np.abs(bestMAerror):
                 bestMA = MA
                 bestMAerror = error
             # else: break
@@ -215,7 +215,7 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
             MB = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JB.reshape(D * D * r)).reshape(D, D * r).T
             error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
-            if error <= bestMBerror:
+            if np.abs(error) <= np.abs(bestMBerror):
                 bestMB = MB
                 bestMBerror = error
             # else: break
@@ -231,13 +231,13 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
         PEPS['B'] = ncon([QB, MB], ([-1, -2, -3, 1, -5], [1, -4]))
         PEPS['NTUerror'] = error
 
-        if ifprint: print("\t", iteration, "\t", error)
+        if ifprint: print("\t", iteration, "\t", np.abs(error))
         if abs(error) < precision:
-            print("\t\tPREC\t\tNTUError =\t", error)
+            print("\t\tPREC\t\tNTUError =\t", np.abs(error))
             return PEPS
 
         if abs(preverror) < abs(error):
-            print("\t\tCONV\t\tNTUError =\t", preverror)
+            print("\t\tCONV\t\tNTUError =\t", np.abs(preverror))
             return prevPEPS
 
     return PEPS

@@ -188,15 +188,15 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
         JB = ncon(tensors, connects, con_order)
 
         U, s, Vh = svd(gA.reshape(D * D * r, D * D * r).T)
-        bestMA, bestMAerror = 0, 10000000000
+        bestMA, bestMAerror = 0, np.inf
         print(s/s[0])
-        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+        for rc in [1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
             ind = np.argmax(np.diff(np.where(s/s[0] > rc, 0, 1)))
             if ind == 0: ind = len(s)
             MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
             error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
-            if error <= bestMAerror:
+            if np.abs(error) <= np.abs(bestMAerror):
                 bestMA = MA
                 bestMAerror = error
             # else: break
@@ -205,14 +205,14 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
 
         U, s, Vh = svd(gB.reshape(D * D * r, D * D * r).T)
         print(s/s[0])
-        bestMB, bestMBerror = 0, 10000000000
-        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+        bestMB, bestMBerror = 0, np.inf
+        for rc in [1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
             ind = np.argmax(np.diff(np.where(s/s[0]>rc, 0, 1)))
             if ind == 0: ind = len(s)
             MB = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JB.reshape(D * D * r)).reshape(D, D * r).T
             error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
-            if error <= bestMBerror:
+            if np.abs(error) <= np.abs(bestMBerror):
                 bestMB = MB
                 bestMBerror = error
             # else: break
@@ -229,11 +229,11 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
 
         if ifprint: print("\t", iteration, "\t", error)
         if abs(error) < precision:
-            print("\t\tPREC\t\tNTUError =\t", error)
+            print("\t\tPREC\t\tNTUError =\t", np.abs(error))
             return PEPS
 
         if abs(preverror) < abs(error):
-            print("\t\tCONV\t\tNTUError =\t", preverror)
+            print("\t\tCONV\t\tNTUError =\t", np.abs(preverror))
             return prevPEPS
 
     return PEPS

@@ -9,7 +9,7 @@ from time import time
 
 print("Importing BH, NTU, CTMRG, Corelations_working")
 import BoseHubbard
-import NTU_BRUTAL_SVD as NTU
+import NTU_PARALLEL_PINV as NTU
 import CTMRG_better
 import Corelations_working as Corelations
 from ncon import ncon
@@ -24,14 +24,13 @@ if __name__ == '__main__':
     chi = int(float(sys.argv[1]))
     D = int(float(sys.argv[2]))
     J = float(sys.argv[3])
-    U = float(sys.argv[4])
+    gx = float(sys.argv[4])
     dt = float(sys.argv[5])
     n = int(float(sys.argv[6]))
     CTMstep = int(float(sys.argv[7]))
 
     d = 2
     r = 9  # <14 <- wartości singularne do dt^3
-    gx = 3.04438 / 10
 
     print("d =", d)
     print("D =", D)
@@ -42,12 +41,12 @@ if __name__ == '__main__':
     print("J =", J)
     print("gx =", gx)
 
-    dir = "./ISING/ISING_NEWNTU_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(gx) + str(
+    dir = "./BH/ISING_NTU_SERIAL_SVD_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(gx) + str(
         "_") + str(dt) + str(
         "_") + str(n)
     print("Saving in ", dir)
     print("Init params created")
-    PEPS = Ising.TrotterGate(dt, 1, gx, 0)
+    PEPS = Ising.TrotterGate(dt, J, gx, 0)
     A0 = np.zeros((D, D, D, D, d), dtype=np.complex128)
     A0[0, 0, 0, 0, 0] = 1
     A0[0, 0, 0, 0, 1] = 1
@@ -68,9 +67,9 @@ if __name__ == '__main__':
 
     env = {}
     np.savez(dir + ('/SPECS.npz'), INVprecision=INVprecision, NTUprecision=NTUprecision, CTMRGprecision=CTMRGprecision,
-             maxiter=maxiter, n=n, dt=dt, d=d, D=D, r=r, chi=chi, J=J, U=U)
+             maxiter=maxiter, n=n, dt=dt, d=d, D=D, r=r, chi=chi, J=J, gx=gx)
     np.savez(dir + ('/PEPS_{:05d}.npz'.format(0)), A=PEPS['A'], B=PEPS['B'], NTUerror=0, SVDUerror=0, iter=0, dt=dt,
-             J=J, U=U)
+             J=J, gx=gx)
 
     for i in range(0, n + 1):
         print(Tools.estimated_time(i, n + 1, t000))
@@ -110,7 +109,7 @@ if __name__ == '__main__':
 
             np.savez(dir + ('/PEPS_{:05d}.npz'.format(i)), A=PEPS['A'], B=PEPS['B'], NTUerror=PEPS['NTUerror'],
                      SVDUerror=PEPS['SVDUerror'], iter=i,
-                     dt=dt, J=J, U=U)
+                     dt=dt, J=J, gx=gx)
 
         if i % CTMstep != 0: continue
         print("#####", i, "/", n, " CTMRG:")
@@ -122,7 +121,7 @@ if __name__ == '__main__':
                  E_N_A=env['E_N_A'], E_N_B=env['E_N_B'], C_NW_A=env['C_NW_A'], C_SW_B=env['C_SW_B'],
                  C_NE_B=env['C_NE_B'], C_SE_A=env['C_SE_A'], C_NW_B=env['C_NW_B'], C_SW_A=env['C_SW_A'],
                  C_NE_A=env['C_NE_A'], C_SE_B=env['C_SE_B'], error=env['error'], iter=i, dt=dt, A=PEPS['A'],
-                 B=PEPS['B'], J=J, U=U)
+                 B=PEPS['B'], J=J, gx=gx)
         print("#####", i, "/", n, " CORELATIONS:")
 
         envrot = CTMRG_better.__rot1env(env)
@@ -131,7 +130,7 @@ if __name__ == '__main__':
         X, Z = np.array([[0, 1], [1, 0]]), np.array([[1, 0], [0, -1]])
 
         np.savez(dir + ('/OBS_{:05d}.npz').format(i), XA=np.trace(X @ env['rhoA']), XB=np.trace(X @ env['rhoB']),
-                                                           ZA=np.trace(Z @ env['rhoA']), ZB=np.trace(Z @ env['rhoB']))
+                 ZA=np.trace(Z @ env['rhoA']), ZB=np.trace(Z @ env['rhoB']))
         corrWE = Corelations.Corelation(env, PEPS, Z, Z, 1)
         corrNS = Corelations.Corelation(envrot, PEPSrot, Z, Z, 1)
         np.savez(dir + ('/CORR_ZZ_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'], iter=i, dt=dt)
@@ -251,4 +250,4 @@ if __name__ == '__main__':
         #          BA_aah_0=E_BA_aah_0, BA_aha_0=E_BA_aha_0, AB_aah_1=E_AB_aah_1, AB_aha_1=E_AB_aha_1, BA_aah_1=E_BA_aah_1,
         #          BA_aha_1=E_BA_aha_1, AB_aah_2=E_AB_aah_2, AB_aha_2=E_AB_aha_2, BA_aah_2=E_BA_aah_2, BA_aha_2=E_BA_aha_2)
 
-        print("Whole sim took:", time() - t000, "s")
+    print("Whole sim took:", time() - t000, "s")

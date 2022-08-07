@@ -9,7 +9,7 @@ from time import time
 
 print("Importing BH, NTU, CTMRG, Corelations_working")
 import BoseHubbard
-import NTU_NEW_SVD as NTU
+import NTU_SERIAL_SVD as NTU
 import CTMRG_better
 import Corelations_working as Corelations
 from ncon import ncon
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     print("J =", J)
     print("U =", U)
 
-    dir = "./BH_NEWNTU_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
+    dir = "./BH/BH_SSVD_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
         "_") + str(n)
     print("Saving in ", dir)
     print("Init params created")
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     CTMRGprecision = 1e-12
     INVprecision = 1e-10
     NTUprecision = 1e-15
-    NTUprecisionspeed = 1e-5
+    NTUprecisionspeed = 0*1e-5
 
     env = {}
     np.savez(dir + ('/SPECS.npz'), INVprecision=INVprecision, NTUprecision=NTUprecision, CTMRGprecision=CTMRGprecision,

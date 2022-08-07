@@ -1,2 +1,7 @@
-qsub run_sudden_py.sh
-qsub run_sudden_ol.sh
+qsub run_short_0.30625.sh
+qsub run_short_0.6125.sh
+qsub run_short_1.225.sh
+qsub run_short_2.45.sh
+qsub run_short_4.9.sh
+qsub run_short_9.8.sh
+qsub run_short_19.6.sh
