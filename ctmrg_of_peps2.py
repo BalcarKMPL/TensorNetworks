@@ -7,18 +7,18 @@ import sys
 import Corelations_working as Corelations
 
 if __name__ == '__main__':
-    i0 = int(float(sys.argv[1]))
+    # i0 = int(float(sys.argv[1]))
     changed = True
     while changed:
         changed = False
         env = {}
-        dirs = ['./BH_NEWNTU_sud_28_7_1.0_4.9_0.005_100']
+        dirs = ['./ISING/ISING_NEWNTU_sud_5_5_1.0_0.3044_0.01_200']
 
         for dir in dirs:
             step = int(int(dir.split('_')[8]) / 25)
-            indexes = np.arange(i0*step,1000,2*step)
+            indexes = np.arange(25,75,1)
 
-            chi = int(dir.split('_')[3])
+            chi = int(dir.split('_')[3])*0+20
             print(indexes)
             print(chi)
             try: paths = os.scandir(dir)
@@ -73,15 +73,28 @@ if __name__ == '__main__':
                     PEPSrot = NTU.__rotinv(PEPS)
 
                     i = int(pepspath.name[5:10])
-                    corrWE = Corelations.Corelation(env, PEPS, ah, a, 2)
-                    corrNS = Corelations.Corelation(envrot, PEPSrot, ah, a, 2)
-                    np.savez(dir + ('/CORR_AHA_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
-                    np.savez(dir + ('/CORR_AHA_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
-                    corrWE = Corelations.Corelation(env, PEPS, a, ah, 2)
-                    corrNS = Corelations.Corelation(envrot, PEPSrot, a, ah, 2)
-                    np.savez(dir + ('/CORR_AAH_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
-                    np.savez(dir + ('/CORR_AAH_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
-                    corrWE = Corelations.Corelation(env, PEPS, ah @ a, ah @ a, 2)
-                    corrNS = Corelations.Corelation(envrot, PEPSrot, ah @ a, ah @ a, 2)
-                    np.savez(dir + ('/CORR_NN_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
-                    np.savez(dir + ('/CORR_NN_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
+                    # corrWE = Corelations.Corelation(env, PEPS, ah, a, 2)
+                    # corrNS = Corelations.Corelation(envrot, PEPSrot, ah, a, 2)
+                    # np.savez(dir + ('/CORR_AHA_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
+                    # np.savez(dir + ('/CORR_AHA_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
+                    # corrWE = Corelations.Corelation(env, PEPS, a, ah, 2)
+                    # corrNS = Corelations.Corelation(envrot, PEPSrot, a, ah, 2)
+                    # np.savez(dir + ('/CORR_AAH_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
+                    # np.savez(dir + ('/CORR_AAH_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
+                    # corrWE = Corelations.Corelation(env, PEPS, ah @ a, ah @ a, 2)
+                    # corrNS = Corelations.Corelation(envrot, PEPSrot, ah @ a, ah @ a, 2)
+                    # np.savez(dir + ('/CORR_NN_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
+                    # np.savez(dir + ('/CORR_NN_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
+
+                    X, Z = np.array([[0, 1], [1, 0]]), np.array([[1, 0], [0, -1]])
+
+                    np.savez(dir + ('/OBS_{:05d}.npz').format(i), XA=np.trace(X @ env['rhoA']), XB=np.trace(X @ env['rhoB']),
+                             ZA=np.trace(Z @ env['rhoA']), ZB=np.trace(Z @ env['rhoB']))
+                    corrWE = Corelations.Corelation(env, PEPS, Z, Z, 1)
+                    corrNS = Corelations.Corelation(envrot, PEPSrot, Z, Z, 1)
+                    np.savez(dir + ('/CORR_ZZ_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
+                    np.savez(dir + ('/CORR_ZZ_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])
+                    corrWE = Corelations.Corelation(env, PEPS, X, X, 1)
+                    corrNS = Corelations.Corelation(envrot, PEPSrot, X, X, 1)
+                    np.savez(dir + ('/CORR_XX_NS_{:05d}.npz'.format(i)), corA=corrNS['corA'], corB=corrNS['corB'])
+                    np.savez(dir + ('/CORR_XX_WE_{:05d}.npz'.format(i)), corA=corrWE['corA'], corB=corrWE['corB'])

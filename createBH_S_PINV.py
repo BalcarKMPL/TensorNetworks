@@ -9,7 +9,7 @@ from time import time
 
 print("Importing BH, NTU, CTMRG, Corelations_working")
 import BoseHubbard
-import NTU_BRUTAL_SVD as NTU
+import NTU_SERIAL_PINV as NTU
 import CTMRG_better
 import Corelations_working as Corelations
 from ncon import ncon
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     print("J =", J)
     print("U =", U)
 
-    dir = "./BH_OLDNTU_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
+    dir = "./BH/BH_SPINV_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
         "_") + str(n)
     print("Saving in ", dir)
     print("Init params created")
@@ -75,7 +75,8 @@ if __name__ == '__main__':
         if i > 0:
             GA = PEPS['GA']
             GB = PEPS['GB']
-            ifsvdu=True
+            t0 = time()
+            ifsvdu=False
             if i>10:
                 ifsvdu=False
 

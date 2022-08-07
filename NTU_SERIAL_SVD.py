@@ -165,6 +165,25 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
                      11, 37, 38, 17, 24, 21, 23, 22, 3, 20, 18, 25, 19, 7]
         gA = ncon(tensors, connects, con_order)
 
+        U, s, Vh = svd(gA.reshape(D * D * r, D * D * r).T)
+        bestMA, bestMAerror = 0, 10000000000
+        print(s/s[0])
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+            ind = np.argmax(np.diff(np.where(s/s[0] > rc, 0, 1)))
+            if ind == 0: ind = len(s)
+            MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
+            error = CalculateError(MA, MB)
+            print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
+            if error <= bestMAerror:
+                bestMA = MA
+                bestMAerror = error
+            # else: break
+        MA = bestMA
+        if ifprint: print("\t\terror = ", np.abs(bestMAerror))
+
+        MA, MB = truncate2(MA @ MB.T, D)
+        MB = MB.T
+
         tensors = [B, B.conj(), A, A.conj(), B, B.conj(), B, B.conj(), A, A.conj(), A, A.conj(), QA, QA.conj(), QB,
                    QB.conj(), MA.conj(), MA]
         connects = [[15, 14, 17, 16, 2], [15, 13, 18, 16, 2], [10, 9, 12, 14, 1], [10, 9, 11, 13, 1],
@@ -187,32 +206,21 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
                      19, 7, 14, 13, 17, 18, 25, 24, 12, 40, 37, 36, 11, 38, 8, 35]
         JB = ncon(tensors, connects, con_order)
 
-        U, s, Vh = svd(gA.reshape(D * D * r, D * D * r).T)
-        bestMA, bestMAerror = 0, 10000000000
-        # print(s/s[0])
-        for ind in np.arange(D*D*r,1):
-            MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
-            error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
-            if error < bestMAerror:
-                bestMA = MA
-                bestMAerror = error
-            # else: break
-        MA = bestMA
-        if ifprint: print("\t\terror = ", np.abs(bestMAerror))
-
         U, s, Vh = svd(gB.reshape(D * D * r, D * D * r).T)
-        # print(s/s[0])
+        print(s/s[0])
         bestMB, bestMBerror = 0, 10000000000
-        for ind in np.arange(D*D*r,1):
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+            ind = np.argmax(np.diff(np.where(s/s[0]>rc, 0, 1)))
+            if ind == 0: ind = len(s)
             MB = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JB.reshape(D * D * r)).reshape(D, D * r).T
             error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
-            if error < bestMBerror:
+            print("\t\t\t",rc,"\t",ind,"\t",np.abs(error))
+            if error <= bestMBerror:
                 bestMB = MB
                 bestMBerror = error
             # else: break
         MB = bestMB
+
         if ifprint: print("\t\terror = ", np.abs(bestMBerror))
 
         MA, MB = truncate2(MA @ MB.T, D)
@@ -236,7 +244,7 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
 
 
 def NTUstep(PEPS0, maxiter=1000, method='L', ifsvdu=False, ifprint=False, precision=1e-20):
-    PEPS = copy.deepcopy(PEPS0)
+    PEPS = __copy(PEPS0)
 
     PEPS = __step(PEPS, maxiter=maxiter, method=method, ifsvdu=ifsvdu, ifprint=ifprint, precision=precision)
     PEPS = __rot(PEPS)

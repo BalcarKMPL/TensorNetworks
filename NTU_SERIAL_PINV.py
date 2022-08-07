@@ -50,28 +50,7 @@ def __rotinv(PEPS):
 
 
 # dict={A,B,GA,GB} <- tensory iPEPS i bramki Trottera
-def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precision=1e-20, precisionspeed=0.01):
-    # if not len(dict['A'].shape) == 5:
-    #     raise Exception(f"Tensor ma rozmiar: {dict['A'].shape}")
-    # if not dict['A'].shape[0] == dict['A'].shape[1] == dict['A'].shape[2] == dict['A'].shape[3]:
-    #     raise Exception(f"Tensor ma rozmiar: {dict['A'].shape}")
-    # if not len(dict['B'].shape) == 5:
-    #     raise Exception(f"Tensor ma rozmiar: {dict['B'].shape}")
-    # if not dict['B'].shape[0] == dict['B'].shape[1] == dict['B'].shape[2] == dict['B'].shape[3]:
-    #     raise Exception(f"Tensor ma rozmiar: {dict['B'].shape}")
-    # if not dict['A'].shape == dict['B'].shape:
-    #     raise Exception(f"Rozmiary tensorów to {dict['A'].shape} i {dict['B'].shape}")
-    # if not len(dict['GA'].shape) == 3:
-    #     raise Exception(f"Bramka ma rozmiar {dict['GA'].shape}, {len(dict['GA'])}")
-    # if not dict['GA'].shape[0] == dict['GA'].shape[1]:
-    #     raise Exception(f"Bramka ma rozmiar {dict['GA'].shape}")
-    # if not len(dict['GB'].shape) == 3:
-    #     raise Exception(f"Bramka ma rozmiar {dict['GB'].shape}")
-    # if not dict['GB'].shape[0] == dict['GB'].shape[1]:
-    #     raise Exception(f"Bramka ma rozmiar {dict['GB'].shape}")
-    # if not dict['GA'].shape == dict['GB'].shape:
-    #     raise Exception(f"Rozmiary bramek to {dict['GA'].shape} i {dict['GB'].shape}")
-
+def __step(PEPS0, maxiter=100, method="L", ifsvdu=False, ifprint=False, precision=1e-20, precisionspeed=0.01):
     PEPS = __copy(PEPS0)
 
     A = PEPS['A']
@@ -116,11 +95,13 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
     con_order = [15, 16, 2, 28, 29, 4, 34, 33, 32, 6, 21, 23, 22, 3, 20, 35, 42, 41, 10, 9, 1, 31, 30, 5, 14,
                  13,
                  18, 11, 26, 27, 39, 25, 38, 12, 36, 8, 37, 17, 19, 7, 24, 40]
-    svduerror = ncon(tensors, connects, con_order)
+    svduerror = np.abs(ncon(tensors, connects, con_order))
+
     PEPS['NTUerror'] = svduerror
     PEPS['SVDUerror'] = svduerror
-    print("\tSVDUE =", np.abs(svduerror))
-    if ifsvdu or np.abs(svduerror) < precision:
+    print("\tSVDUE =",svduerror)
+
+    if ifsvdu or svduerror < precision:
         return PEPS
 
     error = svduerror
@@ -141,7 +122,27 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
             con_order = [15, 16, 2, 28, 29, 4, 34, 33, 32, 6, 21, 23, 22, 3, 20, 35, 42, 41, 10, 9, 1, 31, 30, 5, 14,
                          13,
                          18, 11, 26, 27, 39, 25, 38, 12, 36, 8, 37, 17, 19, 7, 24, 40]
-            return ncon(tensors, connects, con_order)
+            return np.abs(ncon(tensors, connects, con_order))
+            # DDDd = D * D * D * d
+            # DDd = D * D * d
+            #
+            # tensors = [B.swapaxes(0, 1).swapaxes(1, 2).reshape(D, D, DDd),
+            #            B.conj().swapaxes(0, 1).swapaxes(1, 2).reshape(D, D, DDd),
+            #            A.swapaxes(4, 3).swapaxes(3, 2).reshape(DDd, D, D),
+            #            A.conj().swapaxes(4, 3).swapaxes(3, 2).reshape(DDd, D, D), B.swapaxes(0, 1).reshape(D, DDDd),
+            #            B.conj().swapaxes(0, 1).reshape(D, DDDd), B.reshape(D, D, DDd), B.conj().reshape(D, D, DDd),
+            #            A.swapaxes(4, 3).reshape(D, DDd, D), A.conj().swapaxes(4, 3).reshape(D, DDd, D),
+            #            A.swapaxes(4, 3).reshape(DDDd, D), A.conj().swapaxes(4, 3).reshape(DDDd, D),
+            #            QA, QA.conj(), QB, QB.conj(), W, W.conj()]
+            # connects = [[14, 17, 2], [13, 18, 2], [3, 12, 14], [3, 11, 13], [19, 1], [20, 1], [24, 26, 4], [25, 27, 4],
+            #             [37, 5, 26], [38, 5, 27], [6, 36], [6, 35], [17, 40, 24, 19, 7], [18, 41, 25, 20, 7],
+            #             [12, 36, 37, 39, 8], [11, 35, 38, 42, 8], [40, 39], [41, 42]]
+            # con_order = [41, 39, 6, 1, 2, 4, 3, 5, 14, 13, 26, 27, 35, 20, 42, 18, 11, 25, 38, 12, 36, 8, 37, 17, 19, 7,
+            #              24, 40]
+            # return np.abs(ncon(tensors, connects, con_order))
+
+        MA, MB = truncate2(MA @ MB.T, D)
+        MB = MB.T
 
         tensors = [B, B.conj(), A, A.conj(), B, B.conj(), B, B.conj(), A, A.conj(), A, A.conj(), QA, QA.conj(), QB,
                    QB.conj(), RA, RB, MB.conj()]
@@ -165,6 +166,28 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
                      11, 37, 38, 17, 24, 21, 23, 22, 3, 20, 18, 25, 19, 7]
         gA = ncon(tensors, connects, con_order)
 
+        # Metoda normalna (Dr,D)
+
+        bestMA, bestMAerror = 0, 100000000000
+        s = svd(gA.reshape(D * D * r, D * D * r).T, compute_uv=False)
+        # print(s)
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+            MA = __solve(gA.reshape(D * D * r, D * D * r).T, JA.reshape(D * D * r), rcond=rc)
+            MA = MA.reshape(D * r, D)
+            error = CalculateError(MA, MB)
+            print("\t\t\t",rc,"\t",error)
+            if error <= bestMAerror:
+                bestMA = MA
+                bestMAerror = error
+            # else: break
+
+
+        MA = bestMA
+        if ifprint: print("\t\terror = ", bestMAerror)
+
+        MA, MB = truncate2(MA @ MB.T, D)
+        MB = MB.T
+
         tensors = [B, B.conj(), A, A.conj(), B, B.conj(), B, B.conj(), A, A.conj(), A, A.conj(), QA, QA.conj(), QB,
                    QB.conj(), MA.conj(), MA]
         connects = [[15, 14, 17, 16, 2], [15, 13, 18, 16, 2], [10, 9, 12, 14, 1], [10, 9, 11, 13, 1],
@@ -187,56 +210,44 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
                      19, 7, 14, 13, 17, 18, 25, 24, 12, 40, 37, 36, 11, 38, 8, 35]
         JB = ncon(tensors, connects, con_order)
 
-        U, s, Vh = svd(gA.reshape(D * D * r, D * D * r).T)
-        bestMA, bestMAerror = 0, 10000000000
-        # print(s/s[0])
-        for ind in np.arange(D*D*r,1):
-            MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
+        bestMB, bestMBerror = 0, 1000000000000
+        s = svd(gB.reshape(D * D * r, D * D * r).T,compute_uv=False)
+        # print(s)
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+            MB = __solve(gB.reshape(D * D * r, D * D * r).T, JB.reshape(D * D * r), rcond=rc)
+            MB = MB.reshape(D, D * r).T
             error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
-            if error < bestMAerror:
-                bestMA = MA
-                bestMAerror = error
-            # else: break
-        MA = bestMA
-        if ifprint: print("\t\terror = ", np.abs(bestMAerror))
-
-        U, s, Vh = svd(gB.reshape(D * D * r, D * D * r).T)
-        # print(s/s[0])
-        bestMB, bestMBerror = 0, 10000000000
-        for ind in np.arange(D*D*r,1):
-            MB = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JB.reshape(D * D * r)).reshape(D, D * r).T
-            error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
-            if error < bestMBerror:
+            print("\t\t\t",rc,"\t",error)
+            if error <= bestMBerror:
                 bestMB = MB
                 bestMBerror = error
             # else: break
+
         MB = bestMB
-        if ifprint: print("\t\terror = ", np.abs(bestMBerror))
+        if ifprint: print("\t\terror = ", bestMBerror)
 
         MA, MB = truncate2(MA @ MB.T, D)
         MB = MB.T
 
-        error = np.sqrt(bestMAerror ** 2 + bestMBerror ** 2)
+        error = np.sqrt(bestMAerror**2 + bestMBerror**2)
         PEPS['A'] = ncon([QA, MA], ([-1, 1, -3, -4, -5], [1, -2]))
         PEPS['B'] = ncon([QB, MB], ([-1, -2, -3, 1, -5], [1, -4]))
         PEPS['NTUerror'] = error
 
         if ifprint: print("\t", iteration, "\t", error)
         if abs(error) < precision:
-            print("\t\tPREC\t\tNTUError =\t", error)
+            print("\t\tPREC\t\tNTUError =\t",error)
             return PEPS
 
         if abs(preverror) < abs(error):
-            print("\t\tCONV\t\tNTUError =\t", preverror)
+            print("\t\tCONV\t\tNTUError =\t",preverror)
             return prevPEPS
 
     return PEPS
 
 
 def NTUstep(PEPS0, maxiter=1000, method='L', ifsvdu=False, ifprint=False, precision=1e-20):
-    PEPS = copy.deepcopy(PEPS0)
+    PEPS = __copy(PEPS0)
 
     PEPS = __step(PEPS, maxiter=maxiter, method=method, ifsvdu=ifsvdu, ifprint=ifprint, precision=precision)
     PEPS = __rot(PEPS)
@@ -255,7 +266,8 @@ def NTUstep(PEPS0, maxiter=1000, method='L', ifsvdu=False, ifprint=False, precis
     PEPS['time_steps'] += 1
     return PEPS
 
-
+# __step({'A': np.random.randn(5, 5, 5, 5, 2), 'B': np.random.randn(5, 5, 5, 5, 2), 'GA': np.random.randn(2, 2, 3),
+#        'GB': np.random.randn(2, 2, 3)}, maxiter=5)
 def __solve(A,b,rcond):
     #return np.linalg.lstsq(A,b,rcond=rcond)[0]
     # print("pinv")

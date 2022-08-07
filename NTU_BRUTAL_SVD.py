@@ -120,7 +120,7 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
     PEPS['NTUerror'] = svduerror
     PEPS['SVDUerror'] = svduerror
     print("\tSVDUE =", np.abs(svduerror))
-    if ifsvdu or np.abs(svduerror) < precision:
+    if ifsvdu and np.abs(svduerror) < precision:
         return PEPS
 
     error = svduerror
@@ -188,12 +188,12 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
         JB = ncon(tensors, connects, con_order)
 
         U, s, Vh = svd(gA.reshape(D * D * r, D * D * r).T)
-        bestMA, bestMAerror = 0, 10000000000
+        bestMA, bestMAerror = 0, np.inf
         # print(s/s[0])
-        for ind in np.arange(D*D*r,1):
+        for ind in np.arange(D*D*r-1,1,-1):
             MA = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JA.reshape(D * D * r)).reshape(D * r, D)
             error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
+            print("\t\t\t",ind,"\t","{:.5e}".format(s[ind]/s[0]),"\t",np.abs(error))
             if error < bestMAerror:
                 bestMA = MA
                 bestMAerror = error
@@ -202,12 +202,12 @@ def __step(PEPS0, maxiter=1000, method="L", ifsvdu=False, ifprint=False, precisi
         if ifprint: print("\t\terror = ", np.abs(bestMAerror))
 
         U, s, Vh = svd(gB.reshape(D * D * r, D * D * r).T)
-        # print(s/s[0])
-        bestMB, bestMBerror = 0, 10000000000
-        for ind in np.arange(D*D*r,1):
+        print(s/s[0])
+        bestMB, bestMBerror = 0, np.inf
+        for ind in np.arange(D*D*r-1,1,-1):
             MB = (Vh.conj().T[:, :ind] @ np.diag(1 / s[:ind]) @ U.conj().T[:ind, :] @ JB.reshape(D * D * r)).reshape(D, D * r).T
             error = CalculateError(MA, MB)
-            print("\t\t\t",ind,"\t",s[ind]/s[0],"\t",np.abs(error))
+            print("\t\t\t",ind,"\t","{:.5e}".format(s[ind]/s[0]),"\t",np.abs(error))
             if error < bestMBerror:
                 bestMB = MB
                 bestMBerror = error

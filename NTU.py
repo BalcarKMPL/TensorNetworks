@@ -131,7 +131,7 @@ def __step(PEPS0, maxiter=100, method="L", ifsvdu=False, ifprint=False, precisio
         prevPEPS = __copy(PEPS)
         preverror = error
 
-        def CalculateError():
+        def CalculateError(MA, MB):
             W = MA @ MB.T - RA @ RB.T
             tensors = [B, B.conj(), A, A.conj(), B, B.conj(), B, B.conj(), A, A.conj(), A, A.conj(), QA, QA.conj(), QB,
                        QB.conj(), W, W.conj()]
@@ -190,10 +190,12 @@ def __step(PEPS0, maxiter=100, method="L", ifsvdu=False, ifprint=False, precisio
         # Metoda normalna (Dr,D)
 
         bestMA, bestMAerror = 0, 100000000000
-        for rc in [1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
+        s = svd(gA.reshape(D * D * r, D * D * r).T, compute_uv=False)
+        # print(s)
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
             MA = __solve(gA.reshape(D * D * r, D * D * r).T, JA.reshape(D * D * r), rcond=rc)
             MA = MA.reshape(D * r, D)
-            error = CalculateError()
+            error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",error)
             if error < bestMAerror:
                 bestMA = MA
@@ -230,12 +232,12 @@ def __step(PEPS0, maxiter=100, method="L", ifsvdu=False, ifprint=False, precisio
         JB = ncon(tensors, connects, con_order)
 
         bestMB, bestMBerror = 0, 1000000000000
-        for rc in [1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
-        # for rc in (np.logspace(-8,-16,30,endpoint=True)):
-        # for rc in [precision]:
+        s = svd(gB.reshape(D * D * r, D * D * r).T,compute_uv=False)
+        # print(s)
+        for rc in [1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12, 1e-14, 1e-16, 1e-18]:
             MB = __solve(gB.reshape(D * D * r, D * D * r).T, JB.reshape(D * D * r), rcond=rc)
             MB = MB.reshape(D, D * r).T
-            error = CalculateError()
+            error = CalculateError(MA, MB)
             print("\t\t\t",rc,"\t",error)
             if error < bestMBerror:
                 bestMB = MB

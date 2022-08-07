@@ -41,15 +41,16 @@ if __name__ == '__main__':
     print("J =", J)
     print("U =", U)
 
-    dir = "./BH_OLDNTU_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
+    startpath = './BH/BH_d=5_sud_28_7_1.0_4.9_0.001_500/PEPS_00100.npz'
+    dir = "./BH_BRUTALNTUFROMPOINT_sud_" + str(chi) + str("_") + str(D) + str("_") + str(J) + str("_") + str(U) + str("_") + str(dt) + str(
         "_") + str(n)
     print("Saving in ", dir)
     print("Init params created")
     PEPS = BoseHubbard.TrotterGate(d, r, dt / 2, J=J, U=U, mu=0)
-    A0 = np.zeros((D, D, D, D, d), dtype=np.complex128)
-    A0[0, 0, 0, 0, 1] = 1
-    PEPS['A'] = A0
-    PEPS['B'] = A0
+    PEPS0 = dict(np.load(startpath))
+    PEPS['A'] = PEPS0['A']
+    PEPS['B'] = PEPS0['B']
+
 
     if not os.path.isdir(dir): os.mkdir(dir)
 
@@ -63,10 +64,11 @@ if __name__ == '__main__':
     NTUprecision = 1e-15
     NTUprecisionspeed = 0*1e-5
 
+
     env = {}
     np.savez(dir + ('/SPECS.npz'), INVprecision=INVprecision, NTUprecision=NTUprecision, CTMRGprecision=CTMRGprecision,
              maxiter=maxiter, n=n, dt=dt, d=d, D=D, r=r, chi=chi, J=J, U=U)
-    np.savez(dir + ('/PEPS_{:05d}.npz'.format(0)), A=PEPS['A'], B=PEPS['B'], NTUerror=0, SVDUerror=0, iter=0, dt=dt, J=J, U=U)
+    np.savez(dir + ('/PEPS_{:05d}.npz'.format(0)), A=PEPS0['A'], B=PEPS0['B'], NTUerror=0, SVDUerror=0, iter=0, dt=dt, J=J, U=U)
 
     for i in range(0, n + 1):
         print(Tools.estimated_time(i, n + 1, t000))
@@ -75,7 +77,7 @@ if __name__ == '__main__':
         if i > 0:
             GA = PEPS['GA']
             GB = PEPS['GB']
-            ifsvdu=True
+            ifsvdu=False
             if i>10:
                 ifsvdu=False
 
