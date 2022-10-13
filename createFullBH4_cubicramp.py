@@ -62,7 +62,7 @@ if __name__ == '__main__':
     np.savez(dir + ('/SPECS.npz'), NTUprecision=NTUprecision, NTUprecisionspeed=NTUprecisionspeed, maxiter=maxiter, dt=dt, d=d, D=D, r=r, tQ=tQ)
     np.savez(dir + ('/PEPS_{:05d}.npz'.format(0)), A=PEPS['A'], B=PEPS['B'], NTUerror=0, SVDUerror=0, iter=0, dt=dt, t=0, J_exact=0, J_average=0, U=1, NTUdelta=delta)
 
-    for i,t in enumerate(np.arange(-3/2*tQ, 10*tQ, dt)):
+    for i,t in enumerate(np.arange(-3/2*tQ, 2*tQ, dt)):
         print("#####", t/tQ, " NTU:")
         GATES = BoseHubbard.TrotterGate(d, r, dt / 2, J_average(t), 1 / 4, 0)
 

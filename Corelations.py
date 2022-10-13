@@ -33,40 +33,40 @@ def Corelation(env, PEPS, OL, OR, nmax):
     C_SE_B = env['C_SE_B']
 
     def AddLayerLeft(L0, EdgeUp, X, Xc, EdgeDown):
-        chi = EdgeUp.shape[0]
-        D = X.shape[0]
-        d = X.shape[-1]
-
-        L1 = ncon([L0, EdgeUp], ([1, -3, -5, -6], [-1, 1, -2, -4]))
-
-        L2 = ncon([L1.reshape(chi, D * D, D, D, chi), X.swapaxes(3, 2).swapaxes(2, 1).reshape(D * D, D, D, d)],
-                  ([-1, 1, -5, -6, -7], [1, -2, -3, -4]))
-
-        L3 = ncon([L2.reshape(chi, D, D, d * D * D, chi),
-                   Xc.swapaxes(4, 3).swapaxes(3, 2).swapaxes(2, 1).swapaxes(1, 0).swapaxes(4, 3).swapaxes(3, 2).reshape(
-                       d * D * D, D, D)], ([-1, -2, -4, 1, -6], [1, -3, -5]))
-
-        L4 = ncon([L3.reshape(chi, D, D, D * D * chi), EdgeDown.swapaxes(0, 1).reshape(chi, chi * D * D)],
-                  ([-1, -2, -3, 1], [-4, 1]))
+        # chi = EdgeUp.shape[0]
+        # D = X.shape[0]
+        # d = X.shape[-1]
+        #
+        # L1 = ncon([L0, EdgeUp], ([1, -3, -5, -6], [-1, 1, -2, -4]))
+        #
+        # L2 = ncon([L1.reshape(chi, D * D, D, D, chi), X.swapaxes(3, 2).swapaxes(2, 1).reshape(D * D, D, D, d)],
+        #           ([-1, 1, -5, -6, -7], [1, -2, -3, -4]))
+        #
+        # L3 = ncon([L2.reshape(chi, D, D, d * D * D, chi),
+        #            Xc.swapaxes(4, 3).swapaxes(3, 2).swapaxes(2, 1).swapaxes(1, 0).swapaxes(4, 3).swapaxes(3, 2).reshape(
+        #                d * D * D, D, D)], ([-1, -2, -4, 1, -6], [1, -3, -5]))
+        #
+        # L4 = ncon([L3.reshape(chi, D, D, D * D * chi), EdgeDown.swapaxes(0, 1).reshape(chi, chi * D * D)],
+        #           ([-1, -2, -3, 1], [-4, 1]))
 
         return ncon([L0,EdgeUp,EdgeDown,X,Xc],([1,2,3,9],[-1,1,5,6],[9,-4,7,8],[5,-2,7,2,4],[6,-3,8,3,4]))
 
         return L4
 
     def AddLayerRight(R0, EdgeUp, X, Xc, EdgeDown):
-        chi = EdgeUp.shape[0]
-        D = X.shape[0]
-        d = X.shape[-1]
-
-        R1 = ncon([R0, EdgeUp], ([1, -3, -5, -6], [1, -1, -2, -4]))
-
-        R2 = ncon([R1.reshape(chi, D * D, D, D, chi), X.reshape(D * D, D, D, d)],
-                  ([-1, 1, -2, -3, -7], [1, -6, -5, -4]))
-
-        R3 = ncon([R2.reshape(chi, D * D * d, D, D, chi), Xc.swapaxes(4, 3).swapaxes(3, 2).reshape(D * D * d, D, D)],
-                  ([-1, 1, -2, -5, -6], [1, -4, -3]))
-
-        R4 = ncon([R3.reshape(chi, D, D, D * D * chi), EdgeDown.reshape(chi, D * D * chi)], ([-1, -2, -3, 1], [-4, 1]))
+        # chi = EdgeUp.shape[0]
+        # D = X.shape[0]
+        # d = X.shape[-1]
+        #
+        # R1 = ncon([R0, EdgeUp], ([1, -3, -5, -6], [1, -1, -2, -4]))
+        #
+        # R2 = ncon([R1.reshape(chi, D * D, D, D, chi), X.reshape(D * D, D, D, d)],
+        #           ([-1, 1, -2, -3, -7], [1, -6, -5, -4]))
+        #
+        # R3 = ncon([R2.reshape(chi, D * D * d, D, D, chi), Xc.swapaxes(4, 3).swapaxes(3, 2).reshape(D * D * d, D, D)],
+        #           ([-1, 1, -2, -5, -6], [1, -4, -3]))
+        #
+        # R4 = ncon([R3.reshape(chi, D, D, D * D * chi), EdgeDown.reshape(chi, D * D * chi)], ([-1, -2, -3, 1], [-4, 1]))
 
         return ncon([R0,EdgeUp,EdgeDown,X,Xc],([1,4,5,9],[1,-1,2,3],[-4,9,7,8],[2,4,7,-2,6],[3,5,8,-3,6]))
 
@@ -79,7 +79,7 @@ def Corelation(env, PEPS, OL, OR, nmax):
         return ncon([Cup, Edge, Cdown], ([1, -1], [2, 1, -2, -3], [-4, 2]))
 
     def FinishLeftRight(Left, Right):
-        return ncon([Left,Right],([1,2,3,4],[1,2,3,4]))
+        # return ncon([Left,Right],([1,2,3,4],[1,2,3,4]))
         return Left.flatten() @ Right.flatten()
 
     LeftOP_A = CreateLeft(C_NW_A, E_W_B, C_SW_A)
