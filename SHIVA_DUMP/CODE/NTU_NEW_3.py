@@ -124,64 +124,41 @@ def __step(PEPS, GATES, precision=1e-15, ifsvdu=False, maxiter=200, ifprint=True
     MB = MB.T
 
     def calc_g():
-        # BB = B.swapaxes(0, 1).swapaxes(1, 2)
-        # BBB = BB.reshape(D03, D12d)
-        # UB = (BBB @ BBB.conj().T).reshape(D3, D0, D3, D0).swapaxes(1, 2).reshape(D3 ** 2, D0 ** 2)
-        # AA = A.swapaxes(4, 3).swapaxes(3, 2)
-        # AAA = AA.reshape(D01d, D23).T
-        # UA = (AAA @ AAA.conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
-        #
-        # BB = B.reshape(D23, D01d)
-        # DB = (BB @ BB.conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
-        # AA = A.swapaxes(3, 2).swapaxes(2, 1)
-        # AAA = AA.reshape(D03, D12d)
-        # DA = (AAA @ AAA.conj().T).reshape(D0, D3, D0, D3).swapaxes(1, 2).reshape(D0 ** 2, D3 ** 2)
-        #
-        # # BB = B.swapaxes(1, 0)
-        # # BBB = BB.reshape(D3, D012d)
-        # # SB = (BBB @ BBB.conj().T).reshape(D3 ** 2)
-        # # AA = A.swapaxes(3, 2).swapaxes(2, 1).swapaxes(1, 0)
-        # # AAA = AA.reshape(D3, D012d)
-        # # SA = (AAA @ AAA.conj().T).reshape(D3 ** 2)
-        #
-        # SA = np.trace(UA.reshape(D2, D2, D3 ** 2))
-        # SB = np.trace(UB.T.reshape(D0, D0, D3 ** 2))
-        #
-        # QAp = ncon([QA, SB.reshape(D3, D3)], ([-1, -2, -3, 1, -5], [1, -4]))
-        # QAq = (QAp.reshape(D012r, D3d) @ QA.reshape(D012r, D3d).conj().T)
-        # QAr = QAq.reshape(D0, D1r, D2, D0, D1r, D2)
-        # QAs = QAr.swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4)
-        # QAw = QAs.reshape(D0 ** 2, D1r ** 2, D2 ** 2)
-        # QBp = ncon([QB, SA.reshape(D3, D3)], ([-1, 1, -3, -4, -5], [1, -2])).swapaxes(1, 2).swapaxes(2, 3)
-        # QBq = (QBp.reshape(D012r, D3d) @ QB.swapaxes(1, 2).swapaxes(2, 3).reshape(D012r, D3d).conj().T)
-        # QBr = QBq.reshape(D2, D0, D1r, D2, D0, D1r)
-        # QBs = QBr.swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4)
-        # QBw = QBs.reshape(D2 ** 2, D0 ** 2, D1r ** 2)
+        BB = B.swapaxes(0, 1).swapaxes(1, 2)
+        BBB = BB.reshape(D03, D12d)
+        UB = (BBB @ BBB.conj().T).reshape(D3, D0, D3, D0).swapaxes(1, 2).reshape(D3 ** 2, D0 ** 2)
+        AA = A.swapaxes(4, 3).swapaxes(3, 2)
+        AAA = AA.reshape(D01d, D23).T
+        UA = (AAA @ AAA.conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
 
-        tensors = [B, B.conj(), QA, QA.conj(), QB, QB.conj(), A, A.conj(), B, B.conj(), A, A.conj(), B, B.conj(), A,
-                   A.conj()]
-        connects = [[27, 2, 29, 28, 1], [27, 3, 29, 28, 1], [17, -1, 18, 2, 38], [16, -3, 15, 3, 38],
-                    [22, 6, 19, -2, 37], [21, 5, 20, -4, 37], [36, 35, 34, 6, 4], [36, 35, 34, 5, 4],
-                    [25, 10, 17, 26, 7], [25, 9, 16, 26, 7], [23, 24, 22, 10, 8], [23, 24, 21, 9, 8],
-                    [18, 14, 31, 30, 11], [15, 13, 31, 30, 11], [19, 33, 32, 14, 12], [20, 33, 32, 13, 12]]
-        con_order = [27, 29, 28, 1, 36, 35, 34, 4, 5, 6, 37, 23, 24, 8, 31, 30, 11, 25, 26, 7, 10, 9, 22, 21, 33, 32,
-                     12, 14, 13, 19, 20, 3, 2, 38, 16, 15, 17, 18]
-        g1 = ncon(tensors, connects, con_order)
+        BB = B.reshape(D23, D01d)
+        DB = (BB @ BB.conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
+        AA = A.swapaxes(3, 2).swapaxes(2, 1)
+        AAA = AA.reshape(D03, D12d)
+        DA = (AAA @ AAA.conj().T).reshape(D0, D3, D0, D3).swapaxes(1, 2).reshape(D0 ** 2, D3 ** 2)
 
-        # UB = (B.swapaxes(0, 1).swapaxes(1, 2).reshape(D03, D12d) @ B.swapaxes(0, 1).swapaxes(1, 2).reshape(D03, D12d).conj().T).reshape(D3, D0, D3, D0).swapaxes(1, 2).reshape(D3 ** 2, D0 ** 2)
-        # UA = (A.swapaxes(4, 3).swapaxes(3, 2).reshape(D01d, D23).T @ A.swapaxes(4, 3).swapaxes(3, 2).reshape(D01d, D23).T.conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
-        #
-        # DB = (B.reshape(D23, D01d) @ B.reshape(D23, D01d).conj().T).reshape(D2, D3, D2, D3).swapaxes(1, 2).reshape(D2 ** 2, D3 ** 2)
-        # DA = (A.swapaxes(3, 2).swapaxes(2, 1).reshape(D03, D12d) @ A.swapaxes(3, 2).swapaxes(2, 1).reshape(D03, D12d).conj().T).reshape(D0, D3, D0, D3).swapaxes(1, 2).reshape(D0 ** 2, D3 ** 2)
-        #
-        # SB = np.trace(UB.T.reshape(D0, D0, D3 ** 2))
-        # SA = np.trace(UA.reshape(D2, D2, D3 ** 2))
-        #
-        # QAw = (ncon([QA, SB.reshape(D3, D3)], ([-1, -2, -3, 1, -5], [1, -4])).reshape(D012r, D3d) @ QA.reshape(D012r, D3d).conj().T).reshape(D0, D1r, D2, D0, D1r, D2).swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4).reshape(D0 ** 2, D1r ** 2, D2 ** 2)
-        # QBw = (ncon([QB, SA.reshape(D3, D3)], ([-1, 1, -3, -4, -5], [1, -2])).swapaxes(1, 2).swapaxes(2, 3).reshape(D012r, D3d) @ QB.swapaxes(1, 2).swapaxes(2, 3).reshape(D012r, D3d).conj().T).reshape(D2, D0, D1r, D2, D0, D1r).swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4).reshape(D2 ** 2, D0 ** 2, D1r ** 2)
-        # g1 = ncon([QAw, QBw, UA, UB, DA, DB], ([3, -1, 6], [5, 4, -2], [5, 2], [2, 3], [4, 1], [6, 1])).reshape(D1r, D1r, D1r, D1r).swapaxes(1, 2)
+        # BB = B.swapaxes(1, 0)
+        # BBB = BB.reshape(D3, D012d)
+        # SB = (BBB @ BBB.conj().T).reshape(D3 ** 2)
+        # AA = A.swapaxes(3, 2).swapaxes(2, 1).swapaxes(1, 0)
+        # AAA = AA.reshape(D3, D012d)
+        # SA = (AAA @ AAA.conj().T).reshape(D3 ** 2)
 
-        return g1
+        SA = np.trace(UA.reshape(D2, D2, D3 ** 2))
+        SB = np.trace(UB.T.reshape(D0, D0, D3 ** 2))
+
+        QAp = ncon([QA, SB.reshape(D3, D3)], ([-1, -2, -3, 1, -5], [1, -4]))
+        QAq = (QAp.reshape(D012r, D3d) @ QA.reshape(D012r, D3d).conj().T)
+        QAr = QAq.reshape(D0, D1r, D2, D0, D1r, D2)
+        QAs = QAr.swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4)
+        QAw = QAs.reshape(D0 ** 2, D1r ** 2, D2 ** 2)
+        QBp = ncon([QB, SA.reshape(D3, D3)], ([-1, 1, -3, -4, -5], [1, -2])).swapaxes(1, 2).swapaxes(2, 3)
+        QBq = (QBp.reshape(D012r, D3d) @ QB.swapaxes(1, 2).swapaxes(2, 3).reshape(D012r, D3d).conj().T)
+        QBr = QBq.reshape(D2, D0, D1r, D2, D0, D1r)
+        QBs = QBr.swapaxes(1, 3).swapaxes(2, 3).swapaxes(3, 4)
+        QBw = QBs.reshape(D2 ** 2, D0 ** 2, D1r ** 2)
+
+        return ncon([QAw, QBw, UA, UB, DA, DB], ([3, -1, 6], [5, 4, -2], [5, 2], [2, 3], [4, 1], [6, 1])).reshape(D1r, D1r, D1r, D1r).swapaxes(1, 2)
 
     def calc_J():
         return ncon([g, RA, RB], ([4, 3, -1, -2], [4, 2], [3, 2])).reshape(D1r, D1r)
@@ -209,8 +186,7 @@ def __step(PEPS, GATES, precision=1e-15, ifsvdu=False, maxiter=200, ifprint=True
         _g = g.reshape(D1r ** 2, D1r ** 2)
         _J = J.reshape(D1r ** 2)
         # J = rg
-        # return (mgmc-Jmc-mJc+Jrc)
-        # return _m @ _g @ _m.conj() - _J @ _m.conj() - _m @ _J.conj() + _J @ _r.conj()
+        # return (mgm-Jm-mJ+Jr)
         return ((_m - _r) @ _g @ (_m - _r).conj()) / (_r @ _g @ _r.conj())
 
     def calc_MA(gA, JA, rc=1e-8):
@@ -239,34 +215,24 @@ def __step(PEPS, GATES, precision=1e-15, ifsvdu=False, maxiter=200, ifprint=True
 
         gA = calc_gA(MB_best)
         JA = calc_JA(MB_best)
-        U,s,Vh = svd(gA.reshape(D1r*D1,D1r*D1).T / 2 + gA.reshape(D1r*D1,D1r*D1).conj() / 2)
-        rcs = [1e-8] if iffast else 10 ** np.arange(np.floor(np.log10(s[-1]/s[0])),-2,1)
         for rc in rcs:
-            sinv = (1/np.where(s < rc * s[0], 1j, s)).real
-            MA_temp = (Vh.conj().T @ np.diag(sinv) @ U.conj().T @ JA.reshape(D1r * D1)).reshape(D1r, D1)
+            MA_temp = calc_MA(gA, JA, rc=rc)
             error_temp = calc_error(MA_temp, MB_best)
-            if ifprint: print("\t\t\t", f'{rc:.0e}', " \t", f'{np.abs(error_temp):.16e}')
+            if ifprint: print("\t\t\t", rc, " \t", f'{np.abs(error_temp):.16e}')
             if np.abs(error_temp) < np.abs(error_best):
                 MA_best = MA_temp
                 error_best = error_temp
-            # if np.abs(error_temp/error_best) > 10:
-            #     break
         if ifprint: print("\t\t", iter, "A error =", f'{np.abs(error_best):.16e}')
 
         gB = calc_gB(MA_best)
         JB = calc_JB(MA_best)
-        U,s,Vh = svd(gB.reshape(D1r*D1,D1r*D1).T / 2 + gB.reshape(D1r*D1,D1r*D1).conj() / 2)
-        rcs = [1e-8] if iffast else 10 ** np.arange(np.floor(np.log10(s[-1]/s[0])),-2,1)
         for rc in rcs:
-            sinv = (1/np.where(s < rc * s[0], 1j, s)).real
-            MB_temp = (Vh.conj().T @ np.diag(sinv) @ U.conj().T @ JB.reshape(D1r * D1)).reshape(D1, D1r).T
+            MB_temp = calc_MB(gB, JB, rc=rc)
             error_temp = calc_error(MA_best, MB_temp)
-            if ifprint: print("\t\t\t", f'{rc:.0e}', " \t", f'{np.abs(error_temp):.16e}')
+            if ifprint: print("\t\t\t", rc, " \t", f'{np.abs(error_temp):.16e}')
             if np.abs(error_temp) < np.abs(error_best):
                 MB_best = MB_temp
                 error_best = error_temp
-            # if np.abs(error_temp/error_best) > 10:
-            #     break
         if ifprint: print("\t\t", iter, "B error =", f'{np.abs(error_best):.16e}')
 
         if (1 + precisionspeed) * error_best >= error_prev:
