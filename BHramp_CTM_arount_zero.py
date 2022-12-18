@@ -10,19 +10,23 @@ chimult = 2
 INVprecision = 1e-10
 CTMRGprecision = 1e-12
 
-ks = np.arange(0, 110, 10)
+ks = np.arange(0, 110, 5)
 
 print("i beg you fella")
 for chimult in [2, 3, 4]:
     for D in [4, 6, 8, 10, 12, 14]:
         for k in ks:
+            dirr = file(D,k)
             i_around = 3 / 2 * 2 ** (k / 10)
-            if i_around - np.floor(i_around) > 0.3:
-                inds_around = [int(np.floor(i_around)), int(np.ceil(i_around))]
-            else:
-                inds_around = [int(np.round(i_around))-1,int(np.round(i_around)),int(np.round(i_around))+1]
+            inds_around = np.arange(int(np.floor(i_around)-1),int(np.ceil(i_around)+2))
             print(inds_around)
-            for i in np.arange(0,int(np.round(i_around))+2):
+            try:
+                PEPS = dict(np.load(dirr + f'/PEPS_{int(np.ceil(i_around)):05d}.npz'))
+            except:
+                print(dirr + f'/PEPS_{int(np.ceil(i_around)):05d}.npz')
+                print(D,k," -- nie dotarły do punktu zmiany fazy")
+                continue
+            for i in inds_around:
                 print("############################################################")
                 print(f"Completing D = {D}, k = {k}, i = {i}, chi / D = {chimult}")
                 dirr = file(D, k)

@@ -40,7 +40,7 @@ if __name__ == '__main__':
     print("tQ =", tQ)
     print("dt =", dt)
 
-    dir = "./BH-cubicramp_" + str(d) + str("_") + str(D) + str("_") + str(tQ_exp) + str("_") + str(dt) + "-trzy"
+    dir = "./BH-cubicramp_" + str(d) + str("_") + str(D) + str("_") + str(tQ_exp) + str("_") + str(dt) + "-test"
     if not os.path.isdir(dir): os.mkdir(dir)
     print("Saving in ", dir)
 
@@ -62,7 +62,16 @@ if __name__ == '__main__':
     np.savez(dir + ('/SPECS.npz'), NTUprecision=NTUprecision, NTUprecisionspeed=NTUprecisionspeed, maxiter=maxiter, dt=dt, d=d, D=D, r=r, tQ=tQ)
     np.savez(dir + ('/PEPS_{:05d}.npz'.format(0)), A=PEPS['A'], B=PEPS['B'], NTUerror=0, SVDUerror=0, iter=0, dt=dt, t=0, J_exact=0, J_average=0, U=1, NTUdelta=delta)
 
-    for i,t in enumerate(np.arange(-3/2*tQ, 3*dt, dt)):
+    for i in range(1000000):
+        try:
+            PEPS = np.load(dir + ('/PEPS_{:05d}.npz'.format(i)))
+        except:
+            break
+
+    # for i,t in enumerate(np.arange(-3/2*tQ, 3*dt, dt)):
+    for i in range(PEPS['iter'], 1000000000):
+        t = i * dt - 3 / 2 * tQ
+        if (t > 1*dt): break
         print("#####", t/tQ, " NTU:")
         GATES = BoseHubbard.TrotterGate(d, r, dt / 2, J_average(t), 1 / 4, 0)
 
